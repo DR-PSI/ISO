@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:oklch(0.42 0.08 150)}
+a:hover{color:oklch(0.35 0.09 150)}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:oklch(0.85 0.006 150);border-radius:4px}
+</style>
+</helmet>
+
+<div style="display:flex;min-height:100vh;background:oklch(0.965 0.004 150);font-family:'IBM Plex Sans',sans-serif;color:oklch(0.2 0.01 150)">
+
+  <div style="width:240px;flex:none;background:oklch(0.99 0.003 150);border-right:1px solid oklch(0.88 0.006 150);display:flex;flex-direction:column;padding:24px 16px">
+    <div style="padding:0 8px 20px 8px">
+      <div style="font-weight:700;font-size:16px;letter-spacing:-0.01em">Risk Management</div>
+      <div style="font-size:12px;color:oklch(0.48 0.01 150);margin-top:2px">การไฟฟ้านครหลวง · 115/24kV · ISO 55001</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <sc-for list="{{ nav }}" as="item" hint-placeholder-count="5">
+        <div style="{{ item.style }}" onClick="{{ item.onClick }}">{{ item.label }}</div>
+      </sc-for>
+    </div>
+    <div style="margin-top:auto;padding:12px 8px;border-top:1px solid oklch(0.9 0.006 150);font-size:11px;color:oklch(0.55 0.01 150);line-height:1.5">
+      Extension module for<br><span style="font-family:'IBM Plex Mono',monospace;color:oklch(0.42 0.08 150)">Maximo 7.6</span> · PM data sync
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+
+    <div style="padding:20px 32px;border-bottom:1px solid oklch(0.88 0.006 150);display:flex;align-items:center;justify-content:space-between;background:oklch(0.99 0.003 150)">
+      <div>
+        <div style="font-size:20px;font-weight:600">{{ pageTitle }}</div>
+        <div style="font-size:13px;color:oklch(0.48 0.01 150);margin-top:2px">{{ pageSubtitle }}</div>
+      </div>
+      <div style="font-size:11px;padding:6px 12px;border-radius:100px;background:oklch(0.94 0.03 150);color:oklch(0.38 0.09 150);font-weight:600;white-space:nowrap">Prototype · Research Funding Demo</div>
+    </div>
+
+    <div style="flex:1;overflow:auto;padding:32px">
+
+      <!-- DASHBOARD -->
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:18px">
+              <div style="font-size:12px;color:oklch(0.48 0.01 150)">Assets Monitored</div>
+              <div style="font-size:28px;font-weight:700;margin-top:6px;font-family:'IBM Plex Mono',monospace">{{ total }}</div>
+            </div>
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:18px">
+              <div style="font-size:12px;color:oklch(0.48 0.01 150)">High Risk Assets</div>
+              <div style="font-size:28px;font-weight:700;margin-top:6px;font-family:'IBM Plex Mono',monospace;color:oklch(0.55 0.18 25)">{{ highCount }}</div>
+            </div>
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:18px">
+              <div style="font-size:12px;color:oklch(0.48 0.01 150)">Avg Risk Score</div>
+              <div style="font-size:28px;font-weight:700;margin-top:6px;font-family:'IBM Plex Mono',monospace">{{ avgScore }}</div>
+            </div>
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:18px">
+              <div style="font-size:12px;color:oklch(0.48 0.01 150)">Linked to Maximo 7 PM</div>
+              <div style="font-size:28px;font-weight:700;margin-top:6px;font-family:'IBM Plex Mono',monospace;color:oklch(0.42 0.08 150)">{{ total }}/{{ total }}</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px">
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px">
+              <div style="font-size:14px;font-weight:600;margin-bottom:16px">Average Risk Score Trend</div>
+              <div style="display:flex;align-items:flex-end;gap:16px;height:140px">
+                <sc-for list="{{ trendBars }}" as="b" hint-placeholder-count="6">
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end">
+                    <div style="width:100%;max-width:36px;background:oklch(0.6 0.09 150);border-radius:4px 4px 0 0;height:{{ b.height }}"></div>
+                    <div style="font-size:11px;color:oklch(0.48 0.01 150)">{{ b.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px">
+              <div style="font-size:14px;font-weight:600;margin-bottom:2px">ISO 55001 Coverage</div>
+              <div style="font-size:11px;color:oklch(0.48 0.01 150);margin-bottom:14px">ข้อที่ระบบต้นแบบนี้รองรับแล้ว เทียบกับข้อที่ยังไม่ครอบคลุม</div>
+              <div style="display:flex;flex-direction:column;gap:10px;max-height:360px;overflow:auto">
+                <sc-for list="{{ isoClauses }}" as="c" hint-placeholder-count="13">
+                  <div style="display:flex;gap:10px;align-items:flex-start">
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:oklch(0.42 0.08 150);flex:none;width:32px">{{ c.clause }}</div>
+                    <div style="flex:1">
+                      <div style="font-size:13px;color:oklch(0.3 0.01 150);line-height:1.4">{{ c.text }}</div>
+                      <div style="font-size:11px;color:oklch(0.48 0.01 150);margin-top:2px">{{ c.example }}</div>
+                    </div>
+                    <div style="{{ c.badgeStyle }};flex:none">{{ c.badgeLabel }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px">
+            <div style="font-size:14px;font-weight:600;margin-bottom:14px">Top Risk Assets</div>
+            <sc-for list="{{ sortedTop3 }}" as="a" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid oklch(0.92 0.006 150);cursor:pointer" onClick="{{ a.onSelect }}">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:oklch(0.48 0.01 150);width:56px">{{ a.id }}</div>
+                  <div style="font-size:13px">{{ a.name }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:16px">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600">{{ a.score }}</div>
+                  <div style="{{ a.badgeStyle }}">{{ a.levelLabel }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- REGISTER -->
+      <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;gap:8px">
+            <sc-for list="{{ filterChips }}" as="chip" hint-placeholder-count="4">
+              <div style="{{ chip.style }}" onClick="{{ chip.onClick }}">{{ chip.label }}</div>
+            </sc-for>
+          </div>
+          <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;overflow:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr style="background:oklch(0.96 0.004 150)">
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150);font-weight:600">ID</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150);font-weight:600">Equipment</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150);font-weight:600">Station</th>
+                  <th style="text-align:center;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150);font-weight:600">Likelihood</th>
+                  <th style="text-align:center;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150);font-weight:600">Consequence</th>
+                  <th style="text-align:center;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150);font-weight:600">Score</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150);font-weight:600">Risk</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150);font-weight:600">Maximo PM</th>
+                  <th style="padding:10px 16px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ filtered }}" as="a" hint-placeholder-count="8">
+                  <tr style="border-top:1px solid oklch(0.92 0.006 150)">
+                    <td style="padding:10px 16px;font-family:'IBM Plex Mono',monospace">{{ a.id }}</td>
+                    <td style="padding:10px 16px">{{ a.name }}</td>
+                    <td style="padding:10px 16px;color:oklch(0.48 0.01 150)">{{ a.station }}</td>
+                    <td style="padding:10px 16px;text-align:center;font-family:'IBM Plex Mono',monospace">{{ a.likelihood }}</td>
+                    <td style="padding:10px 16px;text-align:center;font-family:'IBM Plex Mono',monospace">{{ a.consequence }}</td>
+                    <td style="padding:10px 16px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600">{{ a.score }}</td>
+                    <td style="padding:10px 16px"><span style="{{ a.badgeStyle }}">{{ a.levelLabel }}</span></td>
+                    <td style="padding:10px 16px;font-family:'IBM Plex Mono',monospace;color:oklch(0.48 0.01 150)">{{ a.pmCode }}</td>
+                    <td style="padding:10px 16px;text-align:right"><a href="javascript:void(0)" onClick="{{ a.onSelect }}" style="font-size:12px;font-weight:600">View →</a></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ASSESSMENT / FMEA -->
+      <sc-if value="{{ isAssessment }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:220px 1fr;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <sc-for list="{{ enrichedForAssetList }}" as="a" hint-placeholder-count="8">
+              <div style="{{ a.assetListStyle }}" onClick="{{ a.onSelect }}">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;opacity:0.7">{{ a.id }}</div>
+                <div style="font-size:12px;font-weight:500">{{ a.name }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px;display:flex;justify-content:space-between;gap:24px">
+              <div>
+                <div style="font-size:16px;font-weight:600">{{ selected.name }}</div>
+                <div style="font-size:12px;color:oklch(0.48 0.01 150);margin-top:2px">{{ selected.type }} · {{ selected.station }}</div>
+                <div style="font-size:13px;margin-top:12px;color:oklch(0.3 0.01 150)">{{ selected.condition }}</div>
+                <div style="font-size:12px;margin-top:10px;color:oklch(0.48 0.01 150)">Maximo PM <span style="font-family:'IBM Plex Mono',monospace">{{ selected.pmCode }}</span> · last {{ selected.lastPM }} · next {{ selected.nextPM }}</div>
+              </div>
+              <div style="text-align:right;flex:none">
+                <div style="font-size:11px;color:oklch(0.48 0.01 150)">Risk Score</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:32px;font-weight:700">{{ selected.score }}</div>
+                <div style="{{ selected.badgeStyle }};margin-top:6px;display:inline-block">{{ selected.levelLabel }}</div>
+              </div>
+            </div>
+
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px;overflow:auto">
+              <div style="font-size:14px;font-weight:600;margin-bottom:14px">FMEA — Failure Mode & Effects Analysis</div>
+              <table style="width:100%;border-collapse:collapse;font-size:12px">
+                <thead>
+                  <tr style="background:oklch(0.96 0.004 150)">
+                    <th style="text-align:left;padding:8px 12px;font-size:11px;color:oklch(0.48 0.01 150)">Failure Mode</th>
+                    <th style="text-align:left;padding:8px 12px;font-size:11px;color:oklch(0.48 0.01 150)">Effect</th>
+                    <th style="text-align:center;padding:8px 12px;font-size:11px;color:oklch(0.48 0.01 150)">S</th>
+                    <th style="text-align:center;padding:8px 12px;font-size:11px;color:oklch(0.48 0.01 150)">O</th>
+                    <th style="text-align:center;padding:8px 12px;font-size:11px;color:oklch(0.48 0.01 150)">D</th>
+                    <th style="text-align:center;padding:8px 12px;font-size:11px;color:oklch(0.48 0.01 150)">RPN</th>
+                    <th style="text-align:left;padding:8px 12px;font-size:11px;color:oklch(0.48 0.01 150)">Recommended Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ fmeaRows }}" as="f" hint-placeholder-count="2">
+                    <tr style="border-top:1px solid oklch(0.92 0.006 150)">
+                      <td style="padding:10px 12px">{{ f.mode }}</td>
+                      <td style="padding:10px 12px;color:oklch(0.48 0.01 150)">{{ f.effect }}</td>
+                      <td style="padding:10px 12px;text-align:center;font-family:'IBM Plex Mono',monospace">{{ f.s }}</td>
+                      <td style="padding:10px 12px;text-align:center;font-family:'IBM Plex Mono',monospace">{{ f.o }}</td>
+                      <td style="padding:10px 12px;text-align:center;font-family:'IBM Plex Mono',monospace">{{ f.d }}</td>
+                      <td style="padding:10px 12px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600">{{ f.rpn }}</td>
+                      <td style="padding:10px 12px">{{ f.action }}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- HEATMAP -->
+      <sc-if value="{{ isHeatmap }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:24px">
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px">Likelihood × Consequence Risk Matrix</div>
+            <div style="font-size:12px;color:oklch(0.48 0.01 150);margin-bottom:4px">แต่ละช่อง = จำนวนอุปกรณ์ที่มีระดับ "โอกาสเกิด" (แถว) และ "ความรุนแรงผลกระทบ" (คอลัมน์) ตรงกัน · สีบ่งระดับความเสี่ยง</div>
+            <div style="display:flex;gap:14px;margin-bottom:18px">
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:oklch(0.4 0.01 150)"><div style="width:12px;height:12px;border-radius:3px;background:oklch(0.94 0.05 25)"></div>High</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:oklch(0.4 0.01 150)"><div style="width:12px;height:12px;border-radius:3px;background:oklch(0.94 0.06 70)"></div>Medium</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:oklch(0.4 0.01 150)"><div style="width:12px;height:12px;border-radius:3px;background:oklch(0.93 0.05 145)"></div>Low</div>
+            </div>
+            <div style="display:flex;gap:12px">
+              <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:8px 0">
+                <div style="font-size:11px;color:oklch(0.48 0.01 150);writing-mode:vertical-rl;transform:rotate(180deg)">Likelihood (โอกาสเกิด)</div>
+              </div>
+              <div style="flex:none;display:flex;flex-direction:column;gap:6px;justify-content:space-between">
+                <sc-for list="{{ matrixRows }}" as="row" hint-placeholder-count="5">
+                  <div style="width:28px;height:56px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:oklch(0.48 0.01 150)">{{ row.likelihood }}</div>
+                </sc-for>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+                <sc-for list="{{ matrixRows }}" as="row" hint-placeholder-count="5">
+                  <div style="display:flex;gap:6px;height:56px">
+                    <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="5">
+                      <div style="{{ cell.style }};flex:1;height:56px;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace">
+                        <div style="font-size:18px;font-weight:600">{{ cell.count }}</div>
+                        <div style="font-size:9px;opacity:0.7">score {{ cell.score }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+                <div style="display:flex;gap:6px">
+                  <sc-for list="{{ consequenceLabels }}" as="n" hint-placeholder-count="5">
+                    <div style="flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:oklch(0.48 0.01 150)">{{ n }}</div>
+                  </sc-for>
+                </div>
+                <div style="text-align:center;font-size:11px;color:oklch(0.48 0.01 150);margin-top:2px">Consequence (ความรุนแรงผลกระทบ) →</div>
+              </div>
+            </div>
+          </div>
+
+          <sc-for list="{{ stations }}" as="st" hint-placeholder-count="2">
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px">
+              <div style="font-size:14px;font-weight:600;margin-bottom:14px">{{ st.name }}</div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <sc-for list="{{ st.items }}" as="a" hint-placeholder-count="4">
+                  <div style="{{ a.chipStyle }}" onClick="{{ a.onSelect }}">
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;opacity:0.75">{{ a.id }}</div>
+                    <div style="font-size:12px;font-weight:600;margin-top:2px">{{ a.score }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- MAINTENANCE -->
+      <sc-if value="{{ isMaintenance }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="font-size:12px;color:oklch(0.48 0.01 150);background:oklch(0.94 0.03 150);border-radius:8px;padding:12px 16px">
+            แผนบำรุงรักษาคำนวณจากระดับความเสี่ยง และซิงก์ Work Order เข้ากับ Maximo 7.6 (concept: MXAPIWO)
+          </div>
+          <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;overflow:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr style="background:oklch(0.96 0.004 150)">
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150)">Equipment</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150)">Risk</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150)">Strategy</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150)">Interval</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150)">Priority</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150)">Maximo WO</th>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:oklch(0.48 0.01 150)">Next Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ sortedTop3AllForMaint }}" as="a" hint-placeholder-count="8">
+                  <tr style="border-top:1px solid oklch(0.92 0.006 150)">
+                    <td style="padding:10px 16px">
+                      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:oklch(0.48 0.01 150)">{{ a.id }}</div>
+                      <div>{{ a.name }}</div>
+                    </td>
+                    <td style="padding:10px 16px"><span style="{{ a.badgeStyle }}">{{ a.levelLabel }}</span></td>
+                    <td style="padding:10px 16px">{{ a.maintStrategy }}</td>
+                    <td style="padding:10px 16px">{{ a.maintInterval }}</td>
+                    <td style="padding:10px 16px">{{ a.maintPriority }}</td>
+                    <td style="padding:10px 16px;font-family:'IBM Plex Mono',monospace;color:oklch(0.48 0.01 150)">{{ a.pmCode }}</td>
+                    <td style="padding:10px 16px;font-family:'IBM Plex Mono',monospace">{{ a.nextPM }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- COMPLIANCE -->
+      <sc-if value="{{ isCompliance }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="font-size:12px;color:oklch(0.48 0.01 150);background:oklch(0.94 0.03 150);border-radius:8px;padding:12px 16px">
+            เนื้อหาทั้งหมดในหน้านี้เป็นข้อมูลตัวอย่าง (sample data) สำหรับสาธิตต้นแบบ ยังไม่ใช่ข้อมูลจริงของหน่วยงาน
+          </div>
+          <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px">
+            <div style="font-size:14px;font-weight:600;margin-bottom:8px">5.2 · นโยบายการบริหารสินทรัพย์ (Asset Management Policy)</div>
+            <div style="font-size:13px;color:oklch(0.3 0.01 150);line-height:1.6">{{ policyText }}</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px">
+              <div style="font-size:14px;font-weight:600;margin-bottom:12px">4.2 · ผู้มีส่วนได้ส่วนเสียและความต้องการ</div>
+              <sc-for list="{{ stakeholders }}" as="s" hint-placeholder-count="4">
+                <div style="padding:10px 0;border-top:1px solid oklch(0.92 0.006 150)">
+                  <div style="font-size:13px;font-weight:600">{{ s.group }}</div>
+                  <div style="font-size:12px;color:oklch(0.48 0.01 150);margin-top:2px">{{ s.need }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px">
+              <div style="font-size:14px;font-weight:600;margin-bottom:12px">7.1 · ทรัพยากรที่จัดสรร</div>
+              <sc-for list="{{ resources }}" as="r" hint-placeholder-count="3">
+                <div style="padding:10px 0;border-top:1px solid oklch(0.92 0.006 150)">
+                  <div style="font-size:13px;font-weight:600">{{ r.item }}</div>
+                  <div style="font-size:12px;color:oklch(0.48 0.01 150);margin-top:2px">{{ r.detail }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px">
+            <div style="font-size:14px;font-weight:600;margin-bottom:12px">8.2 · บันทึกการบริหารการเปลี่ยนแปลง (Management of Change)</div>
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead><tr style="background:oklch(0.96 0.004 150)">
+                <th style="text-align:left;padding:8px 12px;font-size:11px;color:oklch(0.48 0.01 150)">วันที่</th>
+                <th style="text-align:left;padding:8px 12px;font-size:11px;color:oklch(0.48 0.01 150)">การเปลี่ยนแปลง</th>
+                <th style="text-align:left;padding:8px 12px;font-size:11px;color:oklch(0.48 0.01 150)">สถานะ</th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ changeLog }}" as="c" hint-placeholder-count="2">
+                  <tr style="border-top:1px solid oklch(0.92 0.006 150)">
+                    <td style="padding:8px 12px;font-family:'IBM Plex Mono',monospace">{{ c.date }}</td>
+                    <td style="padding:8px 12px">{{ c.change }}</td>
+                    <td style="padding:8px 12px;color:oklch(0.42 0.12 145)">{{ c.status }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px">
+              <div style="font-size:14px;font-weight:600;margin-bottom:12px">9.2 · การตรวจประเมินภายใน (Internal Audit)</div>
+              <sc-for list="{{ auditLog }}" as="a" hint-placeholder-count="2">
+                <div style="padding:10px 0;border-top:1px solid oklch(0.92 0.006 150)">
+                  <div style="font-size:12px;font-family:'IBM Plex Mono',monospace;color:oklch(0.48 0.01 150)">{{ a.date }} · {{ a.scope }}</div>
+                  <div style="font-size:13px;margin-top:2px">{{ a.finding }} <span style="color:oklch(0.42 0.12 145);font-weight:600">· {{ a.status }}</span></div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="background:oklch(0.99 0.003 150);border:1px solid oklch(0.88 0.006 150);border-radius:8px;padding:20px">
+              <div style="font-size:14px;font-weight:600;margin-bottom:12px">9.3 · การทบทวนโดยฝ่ายบริหาร (Management Review)</div>
+              <sc-for list="{{ reviewLog }}" as="r" hint-placeholder-count="2">
+                <div style="padding:10px 0;border-top:1px solid oklch(0.92 0.006 150)">
+                  <div style="font-size:12px;font-family:'IBM Plex Mono',monospace;color:oklch(0.48 0.01 150)">{{ r.date }}</div>
+                  <div style="font-size:13px;margin-top:2px">{{ r.decision }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+const RISK_LEVELS = {
+  high:{label:'High',color:'oklch(0.5 0.19 25)',bg:'oklch(0.94 0.05 25)'},
+  medium:{label:'Medium',color:'oklch(0.5 0.14 70)',bg:'oklch(0.94 0.06 70)'},
+  low:{label:'Low',color:'oklch(0.42 0.12 145)',bg:'oklch(0.93 0.05 145)'}
+};
+function levelFor(score){ if(score>=15) return 'high'; if(score>=6) return 'medium'; return 'low'; }
+const badgeBase = {display:'inline-block',fontSize:'11px',fontWeight:600,padding:'3px 10px',borderRadius:'100px'};
+
+const ASSETS = [
+ {id:'TR-01',name:'Power Transformer 115/24kV TX1',type:'Transformer',station:'Station A',likelihood:4,consequence:5,condition:'DGA trend rising, insulation aging',pmCode:'PM-EL-1042',lastPM:'2026-06-02',nextPM:'2026-12-02'},
+ {id:'TR-02',name:'Power Transformer 115/24kV TX2',type:'Transformer',station:'Station A',likelihood:2,consequence:5,condition:'Good, oil test normal',pmCode:'PM-EL-1043',lastPM:'2026-05-18',nextPM:'2026-11-18'},
+ {id:'FD-11',name:'Feeder ABC 412',type:'Feeder',station:'Station A',likelihood:3,consequence:4,condition:'Aging cable joints, 2 faults last year',pmCode:'PM-EL-2011',lastPM:'2026-04-10',nextPM:'2026-10-10'},
+ {id:'FD-12',name:'Feeder ABC 413',type:'Feeder',station:'Station A',likelihood:2,consequence:3,condition:'Normal',pmCode:'PM-EL-2012',lastPM:'2026-07-01',nextPM:'2027-01-01'},
+ {id:'CB-21',name:'Circuit Breaker 24kV Bay 21',type:'Breaker',station:'Station B',likelihood:4,consequence:4,condition:'SF6 gas pressure below threshold',pmCode:'PM-EL-3021',lastPM:'2026-03-22',nextPM:'2026-09-22'},
+ {id:'CB-22',name:'Circuit Breaker 24kV Bay 22',type:'Breaker',station:'Station B',likelihood:2,consequence:4,condition:'Normal',pmCode:'PM-EL-3022',lastPM:'2026-06-15',nextPM:'2026-12-15'},
+ {id:'TR-03',name:'Power Transformer 115/24kV TX3',type:'Transformer',station:'Station B',likelihood:3,consequence:5,condition:'Bushing partial discharge detected',pmCode:'PM-EL-1044',lastPM:'2026-05-05',nextPM:'2026-11-05'},
+ {id:'FD-31',name:'Feeder XYZ 431',type:'Feeder',station:'Station B',likelihood:1,consequence:3,condition:'Normal',pmCode:'PM-EL-2031',lastPM:'2026-07-20',nextPM:'2027-01-20'}
+];
+
+const FMEA = {
+ 'TR-01':[{mode:'Insulation breakdown (winding)',effect:'Transformer trip, feeder outage',s:5,o:4,d:3},
+          {mode:'Bushing flashover',effect:'Fire risk, extended outage',s:5,o:2,d:3}],
+ 'TR-02':[{mode:'Oil contamination',effect:'Reduced insulation life',s:3,o:2,d:2}],
+ 'FD-11':[{mode:'Cable joint degradation',effect:'Feeder fault, customer outage',s:4,o:3,d:3}],
+ 'FD-12':[{mode:'Insulator contamination',effect:'Flashover in rainy season',s:2,o:2,d:2}],
+ 'CB-21':[{mode:'Loss of SF6 insulation gas',effect:'Breaker fails to interrupt fault',s:5,o:3,d:2},
+          {mode:'Contact wear',effect:'Overheating, arc flash',s:4,o:3,d:3}],
+ 'CB-22':[{mode:'Mechanism lubrication degrade',effect:'Delayed operation',s:3,o:2,d:2}],
+ 'TR-03':[{mode:'Partial discharge in bushing',effect:'Insulation failure, transformer loss',s:5,o:3,d:3}],
+ 'FD-31':[{mode:'Conductor corrosion',effect:'Minor voltage drop',s:2,o:1,d:2}]
+};
+const ACTION_BY_LEVEL = {high:'Increase monitoring frequency, plan corrective work order in Maximo',medium:'Add to next quarterly PM cycle, verify with condition data',low:'Continue standard PM cycle'};
+const MAINT = {
+ high:{strategy:'Condition-based + predictive monitoring (DGA/PD)',interval:'Monthly',priority:'Urgent'},
+ medium:{strategy:'Time-based PM with condition check',interval:'Quarterly',priority:'Scheduled'},
+ low:{strategy:'Time-based PM (standard cycle)',interval:'Semi-annual',priority:'Routine'}
+};
+
+function navItemStyle(active){
+  return {padding:'10px 12px',borderRadius:'8px',fontSize:'13px',fontWeight:active?600:500,
+    background:active?'oklch(0.94 0.03 150)':'transparent',color:active?'oklch(0.38 0.09 150)':'oklch(0.35 0.01 150)',
+    cursor:'pointer'};
+}
+function chipStyle(active){
+  return {padding:'6px 14px',borderRadius:'100px',fontSize:'12px',fontWeight:600,cursor:'pointer',
+    background:active?'oklch(0.42 0.08 150)':'oklch(0.96 0.004 150)',color:active?'white':'oklch(0.4 0.01 150)',
+    border:'1px solid '+(active?'oklch(0.42 0.08 150)':'oklch(0.88 0.006 150)')};
+}
+const POLICY_TEXT = 'การไฟฟ้านครหลวงมุ่งบริหารความเสี่ยงของอุปกรณ์ไฟฟ้าระบบ 115/24kV อย่างเป็นระบบ เพื่อความมั่นคงของระบบจำหน่ายไฟฟ้า ความปลอดภัยของบุคลากร และความคุ้มค่าของการลงทุนบำรุงรักษา สอดคล้องตามมาตรฐาน ISO 55001';
+const STAKEHOLDERS = [
+  {group:'ผู้บริหารการไฟฟ้านครหลวง', need:'ความมั่นคงของระบบไฟฟ้าและงบลงทุนที่คุ้มค่า'},
+  {group:'ทีมบำรุงรักษา (Maintenance)', need:'ข้อมูลความเสี่ยงที่แม่นยำเพื่อวางแผน PM/CM'},
+  {group:'ผู้ใช้ไฟฟ้า/ลูกค้า', need:'ความต่อเนื่องของการจ่ายไฟ ลดเหตุไฟดับ'},
+  {group:'หน่วยงานกำกับดูแล', need:'การปฏิบัติตามมาตรฐานความปลอดภัยและ ISO 55001'}
+];
+const RESOURCES = [
+  {item:'ทีมวิศวกรความเสี่ยง (Risk Engineer)', detail:'ประเมิน FMEA และทบทวนแผนบำรุงรักษาราย 6 เดือน'},
+  {item:'ระบบ Maximo 7.6', detail:'บันทึกและติดตาม Work Order/PM ของอุปกรณ์ไฟฟ้า'},
+  {item:'งบบำรุงรักษาตามความเสี่ยง', detail:'จัดสรรตามระดับความเสี่ยง High/Medium/Low'}
+];
+const CHANGE_LOG = [
+  {date:'2026-06-10', change:'ปรับเกณฑ์ความรุนแรง (Consequence) ของหม้อแปลง TX1', status:'Approved'},
+  {date:'2026-08-02', change:'เพิ่มรอบตรวจสอบ SF6 เบรกเกอร์ CB-21 เป็นรายสัปดาห์', status:'Approved'}
+];
+const AUDIT_LOG = [
+  {date:'2026-05-15', scope:'ทะเบียนความเสี่ยงและ FMEA', finding:'พบ 2 ข้อ ต้องปรับปรุงการอ้างอิงข้อมูล PM', status:'Closed'},
+  {date:'2026-08-20', scope:'แผนบำรุงรักษาตามความเสี่ยง', finding:'ไม่พบข้อบกพร่อง', status:'Closed'}
+];
+const REVIEW_LOG = [
+  {date:'2026-07-01', decision:'อนุมัติเพิ่มความถี่ตรวจสอบหม้อแปลง TX1 และ TX3 เป็นรายเดือน'},
+  {date:'2026-09-01', decision:'เห็นชอบแผนขยายระบบไปยังสถานีย่อยเพิ่มเติมในปีถัดไป'}
+];
+
+const PAGE_META = {
+  dashboard:{title:'Dashboard & Analytic',subtitle:'ภาพรวมความเสี่ยงอุปกรณ์ไฟฟ้า ตามกรอบ ISO 55001'},
+  register:{title:'Risk Register',subtitle:'ทะเบียนความเสี่ยงอุปกรณ์ไฟฟ้าทั้งหมด'},
+  assessment:{title:'Risk Assessment',subtitle:'FMEA — Failure Mode & Effects Analysis'},
+  heatmap:{title:'Risk Heat Map',subtitle:'แผนที่ความเสี่ยงตามสายป้อน/สถานี'},
+  maintenance:{title:'Risk-Based Maintenance',subtitle:'แผนบำรุงรักษาตามระดับความเสี่ยง เชื่อมโยง Maximo 7.6'},
+  compliance:{title:'ISO 55001 Compliance',subtitle:'หลักฐานการปฏิบัติตามมาตรฐาน ครบทุกข้อที่เกี่ยวข้อง'}
+};
+
+class Component extends DCLogic {
+  state = { screen:'dashboard', selectedAssetId:'TR-01', filterLevel:'all' };
+
+  renderVals(){
+    const screen = this.state.screen;
+    const nav = [
+      {key:'dashboard',label:'Dashboard & Analytic'},
+      {key:'register',label:'Risk Register'},
+      {key:'assessment',label:'Risk Assessment (FMEA)'},
+      {key:'heatmap',label:'Risk Heat Map'},
+      {key:'maintenance',label:'Risk-Based Maintenance'},
+      {key:'compliance',label:'ISO 55001 Compliance'}
+    ].map(n=>({...n, style: navItemStyle(n.key===screen), onClick:()=>this.setState({screen:n.key})}));
+
+    const enriched = ASSETS.map(a=>{
+      const score = a.likelihood*a.consequence;
+      const lvl = levelFor(score);
+      const info = RISK_LEVELS[lvl];
+      const maint = MAINT[lvl];
+      const isSel = a.id===this.state.selectedAssetId;
+      return {...a, score, levelKey:lvl, levelLabel:info.label,
+        badgeStyle:{...badgeBase, background:info.bg, color:info.color},
+        chipStyle:{padding:'10px 14px',borderRadius:'8px',cursor:'pointer',background:info.bg,color:info.color,border:'1px solid '+info.color,minWidth:'80px'},
+        assetListStyle:{padding:'8px 10px',borderRadius:'6px',cursor:'pointer',background:isSel?'oklch(0.94 0.03 150)':'transparent',color:isSel?'oklch(0.3 0.06 150)':'oklch(0.35 0.01 150)'},
+        maintStrategy:maint.strategy, maintInterval:maint.interval, maintPriority:maint.priority,
+        onSelect:()=>this.setState({screen:'assessment', selectedAssetId:a.id})};
+    });
+
+    const sorted = [...enriched].sort((x,y)=>y.score-x.score);
+    const filterLevel = this.state.filterLevel;
+    const filtered = filterLevel==='all' ? sorted : sorted.filter(a=>a.levelKey===filterLevel);
+    const filterChips = ['all','high','medium','low'].map(k=>({key:k,
+      label: k==='all' ? 'ทั้งหมด' : RISK_LEVELS[k].label,
+      style: chipStyle(filterLevel===k), onClick:()=>this.setState({filterLevel:k})}));
+
+    const selected = enriched.find(a=>a.id===this.state.selectedAssetId) || enriched[0];
+    const fmeaRows = (FMEA[selected.id]||[]).map(f=>({...f, rpn:f.s*f.o*f.d, action:ACTION_BY_LEVEL[selected.levelKey]}));
+
+    const total = enriched.length;
+    const highCount = enriched.filter(a=>a.levelKey==='high').length;
+    const mediumCount = enriched.filter(a=>a.levelKey==='medium').length;
+    const avgScore = (enriched.reduce((s,a)=>s+a.score,0)/total).toFixed(1);
+
+    const trend = [18,17,15,13,12,Number(avgScore)];
+    const maxTrend = Math.max(...trend);
+    const trendBars = trend.map((v,i)=>({height: Math.round(v/maxTrend*100)+'%', label:['เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.'][i]}));
+
+    const matrixRows = [5,4,3,2,1].map(li=>({
+      likelihood: li,
+      cells: [1,2,3,4,5].map(co=>{
+        const sc = li*co; const lvl = levelFor(sc); const info = RISK_LEVELS[lvl];
+        const count = enriched.filter(a=>a.likelihood===li && a.consequence===co).length;
+        return {score:sc, count, style:{background:info.bg, color:info.color}};
+      })
+    }));
+
+    const consequenceLabels = [1,2,3,4,5];
+    const stations = [...new Set(enriched.map(a=>a.station))].map(st=>({name:st, items: enriched.filter(a=>a.station===st)}));
+
+    const isoClauses = [
+      {clause:'4.2', text:'ความต้องการของผู้มีส่วนได้ส่วนเสีย', example:'ตัวอย่าง: หน้า Compliance ระบุความต้องการของผู้บริหาร ทีมบำรุงรักษา และผู้ใช้ไฟฟ้า', covered:true},
+      {clause:'5.2', text:'นโยบายการบริหารสินทรัพย์ (Asset Management Policy)', example:'ตัวอย่าง: ข้อความนโยบายการบริหารความเสี่ยงอุปกรณ์ไฟฟ้าในหน้า Compliance', covered:true},
+      {clause:'6.1', text:'ระบุและประเมินความเสี่ยง/โอกาส', example:'ตัวอย่าง: หม้อแปลง TX1 ถูกประเมิน Likelihood 4 × Consequence 5 = ความเสี่ยงสูง', covered:true},
+      {clause:'6.2', text:'วัตถุประสงค์การบริหารสินทรัพย์ (KPI targets)', example:'ตัวอย่าง: เป้าหมายลดค่าเฉลี่ยความเสี่ยงจาก 18 เหลือ 12 ภายใน 6 เดือน (ดูกราฟ Trend)', covered:true},
+      {clause:'7.1', text:'ทรัพยากรที่ใช้บริหารสินทรัพย์', example:'ตัวอย่าง: ทีมวิศวกรความเสี่ยงและระบบ Maximo 7.6 ที่ระบุในหน้า Compliance', covered:true},
+      {clause:'7.5', text:'ข้อมูลสารสนเทศที่บันทึกไว้ เชื่อมโยงกับ Maximo 7.6', example:'ตัวอย่าง: รหัส PM-EL-1042 ที่ผูกกับหม้อแปลง TX1 ในหน้า Risk Register', covered:true},
+      {clause:'8.1', text:'การวางแผนและควบคุมการปฏิบัติงาน (Risk-Based Maintenance)', example:'ตัวอย่าง: CB-21 กำหนดตรวจสอบรายเดือนตามระดับความเสี่ยงสูงในหน้า Maintenance', covered:true},
+      {clause:'8.2', text:'การบริหารการเปลี่ยนแปลง (Management of Change)', example:'ตัวอย่าง: บันทึกการปรับเกณฑ์ Consequence ของ TX1 ในหน้า Compliance', covered:true},
+      {clause:'9.1', text:'การเฝ้าติดตาม วัด วิเคราะห์ และประเมินผล (KPI Dashboard)', example:'ตัวอย่าง: KPI จำนวนอุปกรณ์ความเสี่ยงสูงและแนวโน้มคะแนนเฉลี่ยในหน้า Dashboard', covered:true},
+      {clause:'9.2', text:'การตรวจประเมินภายใน (Internal Audit)', example:'ตัวอย่าง: ผลตรวจทะเบียนความเสี่ยงเมื่อ 2026-05-15 ในหน้า Compliance', covered:true},
+      {clause:'9.3', text:'การทบทวนโดยฝ่ายบริหาร (Management Review)', example:'ตัวอย่าง: มติอนุมัติเพิ่มความถี่ตรวจสอบ TX1/TX3 เมื่อ 2026-07-01 ในหน้า Compliance', covered:true},
+      {clause:'10.1', text:'การจัดการข้อไม่สอดคล้องและการแก้ไข (FMEA Corrective Action)', example:'ตัวอย่าง: คำแนะนำแก้ไขในตาราง FMEA ของหน้า Risk Assessment', covered:true},
+      {clause:'10.2', text:'การปรับปรุงอย่างต่อเนื่อง (Risk Trend Monitoring)', example:'ตัวอย่าง: กราฟแนวโน้มคะแนนความเสี่ยงลดลงต่อเนื่อง 6 เดือนในหน้า Dashboard', covered:true}
+    ];
+
+    const isoClausesDisplay = isoClauses.map(c=>({...c,
+      badgeStyle:{...badgeBase, background: c.covered?'oklch(0.93 0.05 145)':'oklch(0.94 0.004 150)', color: c.covered?'oklch(0.42 0.12 145)':'oklch(0.55 0.01 150)'},
+      badgeLabel: c.covered?'รองรับ':'ยังไม่รองรับ'}));
+    const meta = PAGE_META[screen];
+
+    return { screen, nav, pageTitle: meta.title, pageSubtitle: meta.subtitle,
+      isDashboard: screen==='dashboard', isRegister: screen==='register', isAssessment: screen==='assessment',
+      isHeatmap: screen==='heatmap', isMaintenance: screen==='maintenance', isCompliance: screen==='compliance',
+      policyText: POLICY_TEXT, stakeholders: STAKEHOLDERS, resources: RESOURCES, changeLog: CHANGE_LOG, auditLog: AUDIT_LOG, reviewLog: REVIEW_LOG,
+      filtered, filterChips, sortedTop3: sorted.slice(0,3), sortedTop3AllForMaint: sorted,
+      selected, fmeaRows, total, highCount, mediumCount, avgScore, trendBars,
+      matrixRows, consequenceLabels, stations, isoClauses: isoClausesDisplay, enrichedForAssetList: enriched };
+  }
+}
+
+</script>
+</body>
+</html>
