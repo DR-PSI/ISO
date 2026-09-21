@@ -244,7 +244,7 @@ header.topbar{
   box-shadow:var(--shadow);
 }
 .stack{display:flex;flex-direction:column;gap:20px}
-.grid-kpi{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:14px}
+.grid-kpi{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1fr;gap:14px}
 .kpi{padding:18px 18px;display:flex;flex-direction:column;gap:8px;justify-content:space-between}
 .kpi .label{font-size:12px;color:var(--ink-muted)}
 .kpi .value{font-size:26px;font-weight:700;letter-spacing:-0.01em}
@@ -361,6 +361,7 @@ table.data tbody tr:hover{background:var(--surface-2)}
   .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);transition:transform .18s ease;z-index:30;box-shadow:var(--shadow)}
   .sidebar.open{transform:none}
   .grid-kpi{grid-template-columns:1fr 1fr}
+  .grid-kpi .kpi.hero{grid-column:1 / -1}
   .two-col{grid-template-columns:1fr}
   .compliance-grid{grid-template-columns:1fr}
   #menu-btn{display:inline-flex !important}
@@ -482,6 +483,41 @@ const ISO_CLAUSES = [
   {clause:'10.1', text:'การจัดการข้อไม่สอดคล้องและการแก้ไข (FMEA Corrective Action)', example:'คำแนะนำแก้ไขในตาราง FMEA ของหน้า Risk Assessment'},
   {clause:'10.2', text:'การปรับปรุงอย่างต่อเนื่อง (Risk Trend Monitoring)', example:'กราฟแนวโน้มคะแนนความเสี่ยงลดลงต่อเนื่อง 6 เดือนในหน้า Dashboard'}
 ];
+/* Example IoT condition-monitoring links — illustrates how field sensor data
+   (DGA online monitors, PD sensors, SF6 pressure, thermal IoT nodes, etc.)
+   would feed this risk model for predictive maintenance. Sample values only. */
+const IOT_LINKS = {
+  'TR-01':[
+    {label:'DGA — Total Combustible Gas', value:'612', unit:'ppm', status:'critical', trend:'+18% / 30 วัน', device:'DGA Online Monitor', updated:'2 นาทีที่แล้ว'},
+    {label:'Bushing Partial Discharge', value:'38', unit:'pC', status:'warning', trend:'ทรงตัว', device:'PD Sensor', updated:'5 นาทีที่แล้ว'}
+  ],
+  'TR-02':[
+    {label:'Oil Temperature', value:'52', unit:'°C', status:'normal', trend:'ปกติ', device:'RTD + IoT Gateway', updated:'1 นาทีที่แล้ว'}
+  ],
+  'FD-11':[
+    {label:'Cable Joint Temperature', value:'71', unit:'°C', status:'warning', trend:'+6°C / 7 วัน', device:'Thermal IoT Node (RS485-LN)', updated:'3 นาทีที่แล้ว'}
+  ],
+  'FD-12':[
+    {label:'Feeder Load', value:'64', unit:'%', status:'normal', trend:'ปกติ', device:'Feeder CT/PT Monitor', updated:'1 นาทีที่แล้ว'}
+  ],
+  'CB-21':[
+    {label:'SF6 Gas Pressure', value:'4.2', unit:'bar', status:'critical', trend:'ต่ำกว่าเกณฑ์', device:'SF6 Pressure Sensor', updated:'ทันที (live)'},
+    {label:'Mechanism Operation Count', value:'1,120', unit:'ops', status:'normal', trend:'ปกติ', device:'Breaker Cycle Counter', updated:'10 นาทีที่แล้ว'}
+  ],
+  'CB-22':[
+    {label:'SF6 Gas Pressure', value:'5.1', unit:'bar', status:'normal', trend:'ปกติ', device:'SF6 Pressure Sensor', updated:'ทันที (live)'}
+  ],
+  'TR-03':[
+    {label:'Bushing Partial Discharge', value:'56', unit:'pC', status:'critical', trend:'+22% / 14 วัน', device:'PD Sensor', updated:'ทันที (live)'},
+    {label:'Bushing Temperature', value:'61', unit:'°C', status:'warning', trend:'สูงขึ้นเล็กน้อย', device:'Thermal IoT Node', updated:'4 นาทีที่แล้ว'}
+  ],
+  'FD-31':[
+    {label:'Feeder Load', value:'38', unit:'%', status:'normal', trend:'ปกติ', device:'Feeder CT/PT Monitor', updated:'2 นาทีที่แล้ว'}
+  ]
+};
+const IOT_STATUS_LEVEL = {critical:'high', warning:'medium', normal:'low'};
+const IOT_STATUS_LABEL = {critical:'ผิดปกติ', warning:'เฝ้าระวัง', normal:'ปกติ'};
+
 const PAGE_META = {
   dashboard:{title:'Dashboard & Analytic',subtitle:'ภาพรวมความเสี่ยงอุปกรณ์ไฟฟ้า ตามกรอบ ISO 55001'},
   register:{title:'Risk Register',subtitle:'ทะเบียนความเสี่ยงอุปกรณ์ไฟฟ้าทั้งหมด'},
@@ -519,8 +555,37 @@ function enrich(){
     return {...a, score, levelKey:lvl, levelLabel:RISK_LEVELS[lvl].label, maint};
   });
 }
+function iotTile(s){
+  const lvl = IOT_STATUS_LEVEL[s.status];
+  return `
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="font-size:11.3px;color:var(--ink-muted);line-height:1.3">${esc(s.label)}</div>
+        <span class="badge" style="background:var(--risk-${lvl}-bg);color:var(--risk-${lvl});flex:none;font-size:9.5px;padding:2px 7px">${IOT_STATUS_LABEL[s.status]}</span>
+      </div>
+      <div class="mono" style="font-size:20px;font-weight:700;color:var(--risk-${lvl})">${s.value}<span style="font-size:11px;color:var(--ink-muted);font-weight:500"> ${s.unit}</span></div>
+      <div style="font-size:10.5px;color:var(--ink-faint);display:flex;justify-content:space-between;gap:8px">
+        <span>${esc(s.device)}</span><span>${esc(s.updated)}</span>
+      </div>
+    </div>`;
+}
+function iotPanel(assetId, opts){
+  opts = opts || {};
+  const sensors = IOT_LINKS[assetId] || [];
+  if(!sensors.length) return '';
+  return `
+    <div class="card" style="padding:20px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:2px">
+        <div class="section-title">IoT Condition Monitoring <span style="font-weight:500;color:var(--ink-muted)">— ตัวอย่างการเชื่อมโยง</span></div>
+        <span class="badge" style="background:var(--accent-soft);color:var(--accent-ink);flex:none;font-size:10px"><span class="swatch" style="background:var(--accent)"></span>${sensors.length} sensor${sensors.length>1?'s':''}</span>
+      </div>
+      <div class="section-sub" style="margin-bottom:14px">${opts.caption || 'ข้อมูลจากอุปกรณ์ IoT ภาคสนาม (ตัวอย่าง) ป้อนเข้าสู่การคำนวณ Risk Score และปรับรอบ Predictive Maintenance โดยอัตโนมัติ'}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
+        ${sensors.map(iotTile).join('')}
+      </div>
+    </div>`;
+}
 
-/* ============ render ============ */
 function render(){
   const enriched = enrich();
   const meta = PAGE_META[state.screen];
@@ -555,6 +620,7 @@ function renderDashboard(enriched){
   const trend = [18,17,15,13,12,Number(avgScore)];
   const months = ['เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.'];
   const sortedTop3 = [...enriched].sort((x,y)=>y.score-x.score).slice(0,3);
+  const iotAssetCount = enriched.filter(a=>(IOT_LINKS[a.id]||[]).length>0).length;
 
   return `
   <div class="stack">
@@ -575,6 +641,10 @@ function renderDashboard(enriched){
       <div class="card kpi">
         <div class="label">Linked to Maximo 7 PM</div>
         <div class="value mono" style="color:var(--accent-ink)">${total}/${total}</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">IoT Sensors Linked <span style="font-weight:400">(ตัวอย่าง)</span></div>
+        <div class="value mono" style="color:var(--accent-ink)">${iotAssetCount}/${total}</div>
       </div>
     </div>
 
@@ -733,6 +803,7 @@ function renderAssessment(enriched){
           </tbody>
         </table>
       </div>
+      ${iotPanel(selected.id, {caption:'เซ็นเซอร์ที่ผูกกับ '+selected.id+' — ค่าที่อ่านได้ใช้ยืนยัน/ปรับระดับความเสี่ยงและความถี่ PM ของอุปกรณ์นี้โดยอัตโนมัติ'})}
     </div>
   </div>`;
 }
@@ -794,14 +865,24 @@ function renderMaintenance(enriched){
   const sorted = [...enriched].sort((x,y)=>y.score-x.score);
   return `
   <div class="stack" style="gap:16px">
-    <div class="note">แผนบำรุงรักษาคำนวณจากระดับความเสี่ยง และซิงก์ Work Order เข้ากับ Maximo 7.6 (concept: MXAPIWO)</div>
+    <div class="note">แผนบำรุงรักษาคำนวณจากระดับความเสี่ยง และซิงก์ Work Order เข้ากับ Maximo 7.6 (concept: MXAPIWO) — คอลัมน์ IoT Sensor เป็นตัวอย่างข้อมูลภาคสนามที่ใช้ยืนยันและปรับรอบ Predictive Maintenance โดยอัตโนมัติ</div>
     <div class="card" style="overflow:auto">
       <table class="data">
         <thead><tr>
-          <th>Equipment</th><th>Risk</th><th>Strategy</th><th>Interval</th><th>Priority</th><th>Maximo WO</th><th>Next Action</th>
+          <th>Equipment</th><th>Risk</th><th>Strategy</th><th>Interval</th><th>Priority</th><th>IoT Sensor (ตัวอย่าง)</th><th>Maximo WO</th><th>Next Action</th>
         </tr></thead>
         <tbody>
-          ${sorted.map(a=>`
+          ${sorted.map(a=>{
+            const s = (IOT_LINKS[a.id]||[])[0];
+            const iotCell = s ? `
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="width:7px;height:7px;border-radius:50%;background:var(--risk-${IOT_STATUS_LEVEL[s.status]});flex:none"></span>
+                <div style="min-width:0">
+                  <div style="font-size:11.5px;line-height:1.3">${esc(s.label)}</div>
+                  <div class="mono" style="font-size:11px;color:var(--ink-muted)">${s.value} ${s.unit} · ${esc(s.device)}</div>
+                </div>
+              </div>` : `<span style="color:var(--ink-faint)">—</span>`;
+            return `
             <tr>
               <td>
                 <div class="mono" style="font-size:11px;color:var(--ink-muted)">${a.id}</div>
@@ -811,11 +892,15 @@ function renderMaintenance(enriched){
               <td>${a.maint.strategy}</td>
               <td>${a.maint.interval}</td>
               <td>${a.maint.priority}</td>
+              <td>${iotCell}</td>
               <td class="mono" style="color:var(--ink-muted)">${a.pmCode}</td>
               <td class="mono">${a.nextPM}</td>
-            </tr>`).join('')}
+            </tr>`;}).join('')}
         </tbody>
       </table>
+    </div>
+    <div class="stack" style="gap:14px">
+      ${sorted.filter(a=>a.levelKey==='high').slice(0,2).map(a=>iotPanel(a.id, {caption:`${a.id} · ${a.name} — ระดับความเสี่ยงสูง จึงปรับมาใช้ predictive monitoring ตามค่าที่อ่านได้จากเซ็นเซอร์นี้ (ตัวอย่าง)`})).join('')}
     </div>
   </div>`;
 }
