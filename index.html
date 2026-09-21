@@ -617,7 +617,7 @@ function renderDashboard(enriched){
 }
 
 function trendChart(values, labels){
-  const w=560,h=150,padL=26,padR=10,padT=14,padB=22;
+  const w=560,h=150,padL=26,padR=10,padT=26,padB=22;
   const max = Math.max(...values), min = Math.min(...values);
   const range = (max-min)||1;
   const stepX = (w-padL-padR)/(values.length-1);
